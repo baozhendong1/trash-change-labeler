@@ -5,9 +5,14 @@
 ## 启动
 
 ```powershell
-npm install
+npm ci
 npm run dev
 ```
+
+本项目是纯前端 Vue/Vite 应用，不需要 Python 或 `requirements.txt`。运行环境
+建议使用 Node.js 20 LTS 或更高版本，并使用 npm 10 或更高版本。依赖和精确
+版本已记录在 `package.json` 与 `package-lock.json`；如果锁文件发生变化，
+再使用 `npm install` 更新它。
 
 浏览器打开 Vite 输出的本地地址。生产构建使用：
 
@@ -61,6 +66,9 @@ npm run preview
 npm test
 npm run build
 ```
+
+`npm test` 会运行 Vitest 单元测试；`npm run build` 会先执行 TypeScript 类型
+检查，再生成 `dist/` 生产构建目录。`node_modules/` 和 `dist/` 不应提交到 Git。
 
 UI 冒烟测试需要先启动预览服务，并使用已安装的本机 Chrome：
 
