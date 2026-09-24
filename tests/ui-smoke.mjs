@@ -1,0 +1,41 @@
+import { chromium } from 'playwright'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
+import fs from 'node:fs'
+
+const root = path.dirname(fileURLToPath(import.meta.url))
+const fixtures = path.join(root, 'fixtures')
+const t1 = path.join(fixtures, 'scene_001_t1.png')
+const t2 = path.join(fixtures, 'scene_001_t2.png')
+if (!fs.existsSync(t1) || !fs.existsSync(t2)) throw new Error('Run tests/ui_smoke.py once to create fixtures')
+
+const browser = await chromium.launch({ headless: true, executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' })
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+const errors = []
+page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()) })
+await page.goto('http://127.0.0.1:4173')
+await page.waitForLoadState('networkidle')
+page.once('dialog', async (dialog) => dialog.accept('现场样本_001'))
+await page.getByRole('button', { name: '新建样本' }).click()
+const inputs = page.locator('input[type="file"]')
+await inputs.nth(0).setInputFiles(t1)
+await inputs.nth(1).setInputFiles(t2)
+await page.getByRole('heading', { name: '现场样本_001' }).waitFor()
+const overlay = page.locator('.canvas-layer--overlay')
+const box = await overlay.boundingBox()
+if (!box) throw new Error('Canvas not visible')
+await page.mouse.move(box.x + box.width * .35, box.y + box.height * .35)
+await page.mouse.down()
+await page.mouse.move(box.x + box.width * .55, box.y + box.height * .5, { steps: 12 })
+await page.mouse.up()
+if (!await page.getByText('输出 512 × 512').isVisible()) throw new Error('Standard crop size is not visible')
+const changedValue = page.locator('.facts div').filter({ hasText: '变化像素' }).locator('dd')
+const painted = Number((await changedValue.innerText()).replaceAll(',', ''))
+if (painted <= 0) throw new Error('Brush did not create changed pixels')
+await page.locator('button[title="撤销 Ctrl+Z"]').click()
+if (Number((await changedValue.innerText()).replaceAll(',', '')) !== 0) throw new Error('Undo did not restore empty mask')
+await page.locator('button[title="重做 Ctrl+Y"]').click()
+if (Number((await changedValue.innerText()).replaceAll(',', '')) <= 0) throw new Error('Redo did not restore painted mask')
+await page.screenshot({ path: path.join(root, 'ui_smoke.png'), fullPage: true })
+if (errors.length) throw new Error(errors.join('\n'))
+await browser.close()

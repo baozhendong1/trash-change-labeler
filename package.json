@@ -1,0 +1,28 @@
+{
+  "name": "trash-change-labeler",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "test": "vitest run",
+    "test:ui": "node tests/ui-smoke.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@phosphor-icons/vue": "^2.2.1",
+    "vue": "^3.5.18"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/test-utils": "^2.5.1",
+    "jsdom": "^30.1.0",
+    "playwright": "^1.63.0",
+    "typescript": "^5.8.3",
+    "vite": "^7.1.3",
+    "vitest": "^3.2.4",
+    "vue-tsc": "^2.2.12"
+  }
+}
